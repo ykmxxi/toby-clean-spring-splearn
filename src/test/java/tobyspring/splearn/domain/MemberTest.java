@@ -132,4 +132,12 @@ class MemberTest {
 
         assertThat(member.isActive()).isFalse();
     }
+
+    @DisplayName("유효하지 않은 이메일로 회원을 생성할 수 없다.")
+    @Test
+    void invalidEmail() {
+        assertThatThrownBy(() ->
+                Member.create(new MemberCreateRequest("invalid email", "Posty", "secret"), passwordEncoder)
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
 }

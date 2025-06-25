@@ -10,7 +10,7 @@ import lombok.ToString;
 @ToString
 public class Member {
 
-    private String email;
+    private Email email;
 
     private String nickname;
 
@@ -24,7 +24,7 @@ public class Member {
     public static Member create(final MemberCreateRequest createRequest, final PasswordEncoder passwordEncoder) {
         Member member = new Member();
 
-        member.email = requireNonNull(createRequest.email());
+        member.email = new Email(requireNonNull(createRequest.email()));
         member.nickname = requireNonNull(createRequest.nickname());
         member.passwordHash = requireNonNull(passwordEncoder.encode(createRequest.password()));
 
