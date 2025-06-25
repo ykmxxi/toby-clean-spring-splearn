@@ -19,7 +19,7 @@ public class Member {
 
     private MemberStatus status;
 
-    public Member(final String email, final String nickname, final String passwordHash) {
+    private Member(final String email, final String nickname, final String passwordHash) {
         this.email = Objects.requireNonNull(email);
         this.nickname = Objects.requireNonNull(nickname);
         this.passwordHash = Objects.requireNonNull(passwordHash);
@@ -27,10 +27,12 @@ public class Member {
         this.status = MemberStatus.PENDING;
     }
 
+    public static Member create(final String email, final String nickname, final String password,
+                                final PasswordEncoder passwordEncoder) {
+        return new Member(email, nickname, passwordEncoder.encode(password));
+    }
+
     public void activate() {
-//        if (this.status != MemberStatus.PENDING) {
-//            throw new IllegalStateException("PENDING 상태가 아닙니다.");
-//        }
         state(status == MemberStatus.PENDING, "PENDING 상태가 아닙니다.");
 
         this.status = MemberStatus.ACTIVE;
@@ -40,5 +42,17 @@ public class Member {
         state(status == MemberStatus.ACTIVE, "ACTIVATE 상태가 아닙니다.");
 
         this.status = MemberStatus.DEACTIVATED;
+    }
+
+    public boolean verifyPassword(final String password, final PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(password, this.passwordHash);
+    }
+
+    public void changeNickname(final String nickname) {
+        this.nickname = Objects.requireNonNull(nickname);
+    }
+
+    public void changePassword(final String password, final PasswordEncoder passwordEncoder) {
+        this.passwordHash = passwordEncoder.encode(Objects.requireNonNull(password));
     }
 }

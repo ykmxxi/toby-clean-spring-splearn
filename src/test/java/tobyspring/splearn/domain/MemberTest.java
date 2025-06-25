@@ -3,34 +3,43 @@ package tobyspring.splearn.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class MemberTest {
+
+    private PasswordEncoder passwordEncoder;
+    private Member member;
+
+    @BeforeEach
+    void setUp() {
+        this.passwordEncoder = new PasswordEncoder() {
+            @Override
+            public String encode(final String password) {
+                return password.toUpperCase();
+            }
+
+            @Override
+            public boolean matches(final String password, final String passwordHash) {
+                return encode(password).equals(passwordHash);
+            }
+        };
+        member = Member.create("posty@splearn.app", "Posty", "secret", passwordEncoder);
+    }
 
     @DisplayName("회원을 생성하면 PENDING(가입 대기) 상태다.")
     @Test
     void createMember() {
-        // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
-
         // when & then
         assertThat(member.getStatus()).isEqualByComparingTo(MemberStatus.PENDING);
-    }
-
-    @DisplayName("닉네임이 null이면 회원을 생성할 수 없다.")
-    @Test
-    void createMemberWithNullNickName() {
-        assertThatThrownBy(() -> new Member("posty@splearn.app", null, "secret"))
-                .isInstanceOf(NullPointerException.class);
     }
 
     @DisplayName("가입 대기(PENDING) 상태의 회원을 가입 완료시킬 수 있다.")
     @Test
     void activate() {
-        // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
-
         // when
         member.activate();
 
@@ -42,7 +51,6 @@ class MemberTest {
     @Test
     void activateFail() {
         // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
         member.activate();
 
         // when & then
@@ -54,7 +62,6 @@ class MemberTest {
     @Test
     void deactivate() {
         // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
         member.activate();
 
         // when
@@ -67,9 +74,6 @@ class MemberTest {
     @DisplayName("가입 대기 상태의 회원을 탈퇴시킬 수 없다.")
     @Test
     void deactivateFailWhenPending() {
-        // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
-
         // when & then
         assertThatThrownBy(member::deactivate)
                 .isInstanceOf(IllegalStateException.class);
@@ -79,12 +83,39 @@ class MemberTest {
     @Test
     void deactivateFailWhenDeactivated() {
         // given
-        var member = new Member("posty@splearn.app", "Posty", "secret");
         member.activate();
         member.deactivate();
 
         // when & then
         assertThatThrownBy(member::deactivate)
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    @DisplayName("비밀번호가 회원의 패스워드 해시값과 일치하는지 확인한다.")
+    @CsvSource(value = {
+            "secret,true",
+            "hello,false"
+    })
+    @ParameterizedTest
+    void verifyPassword(String password, boolean expected) {
+        assertThat(member.verifyPassword(password, passwordEncoder)).isEqualTo(expected);
+    }
+
+    @DisplayName("changeNickname")
+    @Test
+    void changeNickname() {
+        assertThat(member.getNickname()).isEqualTo("Posty");
+
+        member.changeNickname("Bokdeok");
+
+        assertThat(member.getNickname()).isEqualTo("Bokdeok");
+    }
+
+    @DisplayName("changePassword")
+    @Test
+    void changePassword() {
+        member.changePassword("verysecret", passwordEncoder);
+
+        assertThat(member.verifyPassword("verysecret", passwordEncoder)).isTrue();
     }
 }
