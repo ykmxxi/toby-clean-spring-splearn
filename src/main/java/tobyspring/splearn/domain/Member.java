@@ -1,8 +1,7 @@
 package tobyspring.splearn.domain;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
-
-import java.util.Objects;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -19,17 +18,19 @@ public class Member {
 
     private MemberStatus status;
 
-    private Member(final String email, final String nickname, final String passwordHash) {
-        this.email = Objects.requireNonNull(email);
-        this.nickname = Objects.requireNonNull(nickname);
-        this.passwordHash = Objects.requireNonNull(passwordHash);
-
-        this.status = MemberStatus.PENDING;
+    private Member() {
     }
 
-    public static Member create(final String email, final String nickname, final String password,
-                                final PasswordEncoder passwordEncoder) {
-        return new Member(email, nickname, passwordEncoder.encode(password));
+    public static Member create(final MemberCreateRequest createRequest, final PasswordEncoder passwordEncoder) {
+        Member member = new Member();
+
+        member.email = requireNonNull(createRequest.email());
+        member.nickname = requireNonNull(createRequest.nickname());
+        member.passwordHash = requireNonNull(passwordEncoder.encode(createRequest.password()));
+
+        member.status = MemberStatus.PENDING;
+
+        return member;
     }
 
     public void activate() {
@@ -39,7 +40,7 @@ public class Member {
     }
 
     public void deactivate() {
-        state(status == MemberStatus.ACTIVE, "ACTIVATE 상태가 아닙니다.");
+        state(isActive(), "ACTIVATE 상태가 아닙니다.");
 
         this.status = MemberStatus.DEACTIVATED;
     }
@@ -49,10 +50,14 @@ public class Member {
     }
 
     public void changeNickname(final String nickname) {
-        this.nickname = Objects.requireNonNull(nickname);
+        this.nickname = requireNonNull(nickname);
     }
 
     public void changePassword(final String password, final PasswordEncoder passwordEncoder) {
-        this.passwordHash = passwordEncoder.encode(Objects.requireNonNull(password));
+        this.passwordHash = passwordEncoder.encode(requireNonNull(password));
+    }
+
+    public boolean isActive() {
+        return this.status == MemberStatus.ACTIVE;
     }
 }

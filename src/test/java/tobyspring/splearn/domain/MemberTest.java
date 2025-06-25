@@ -27,7 +27,7 @@ class MemberTest {
                 return encode(password).equals(passwordHash);
             }
         };
-        member = Member.create("posty@splearn.app", "Posty", "secret", passwordEncoder);
+        member = Member.create(new MemberCreateRequest("posty@splearn.app", "Posty", "secret"), passwordEncoder);
     }
 
     @DisplayName("회원을 생성하면 PENDING(가입 대기) 상태다.")
@@ -101,7 +101,7 @@ class MemberTest {
         assertThat(member.verifyPassword(password, passwordEncoder)).isEqualTo(expected);
     }
 
-    @DisplayName("changeNickname")
+    @DisplayName("회원의 닉네임을 변경한다.")
     @Test
     void changeNickname() {
         assertThat(member.getNickname()).isEqualTo("Posty");
@@ -111,11 +111,25 @@ class MemberTest {
         assertThat(member.getNickname()).isEqualTo("Bokdeok");
     }
 
-    @DisplayName("changePassword")
+    @DisplayName("회원의 비밀번호를 변경한다.")
     @Test
     void changePassword() {
         member.changePassword("verysecret", passwordEncoder);
 
         assertThat(member.verifyPassword("verysecret", passwordEncoder)).isTrue();
+    }
+
+    @DisplayName("회원의 활성 상태를 확인한다.")
+    @Test
+    void shouldBeActive() {
+        assertThat(member.isActive()).isFalse();
+
+        member.activate();
+
+        assertThat(member.isActive()).isTrue();
+
+        member.deactivate();
+
+        assertThat(member.isActive()).isFalse();
     }
 }
