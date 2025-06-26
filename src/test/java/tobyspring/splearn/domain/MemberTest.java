@@ -27,17 +27,17 @@ class MemberTest {
                 return encode(password).equals(passwordHash);
             }
         };
-        member = Member.create(new MemberCreateRequest("posty@splearn.app", "Posty", "secret"), passwordEncoder);
+        member = Member.register(new MemberRegisterRequest("posty@splearn.app", "Posty", "secret"), passwordEncoder);
     }
 
-    @DisplayName("회원을 생성하면 PENDING(가입 대기) 상태다.")
+    @DisplayName("회원을 등록하면 PENDING(등록 대기) 상태다.")
     @Test
-    void createMember() {
+    void registerMember() {
         // when & then
         assertThat(member.getStatus()).isEqualByComparingTo(MemberStatus.PENDING);
     }
 
-    @DisplayName("가입 대기(PENDING) 상태의 회원을 가입 완료시킬 수 있다.")
+    @DisplayName("등록 대기(PENDING) 상태의 회원을 등록 완료시킬 수 있다.")
     @Test
     void activate() {
         // when
@@ -47,7 +47,7 @@ class MemberTest {
         assertThat(member.getStatus()).isEqualByComparingTo(MemberStatus.ACTIVE);
     }
 
-    @DisplayName("가입 대기(PENDING) 상태가 아니면 회원을 가입 완료시킬 수 없다.")
+    @DisplayName("등록 대기(PENDING) 상태가 아니면 회원을 등록 완료시킬 수 없다.")
     @Test
     void activateFail() {
         // given
@@ -58,7 +58,7 @@ class MemberTest {
                 .isInstanceOf(IllegalStateException.class);
     }
 
-    @DisplayName("가입 완료(ACTIVATE) 상태의 회원을 탈퇴시킬 수 있다.")
+    @DisplayName("등록 완료(ACTIVATE) 상태의 회원을 탈퇴시킬 수 있다.")
     @Test
     void deactivate() {
         // given
@@ -71,7 +71,7 @@ class MemberTest {
         assertThat(member.getStatus()).isEqualByComparingTo(MemberStatus.DEACTIVATED);
     }
 
-    @DisplayName("가입 대기 상태의 회원을 탈퇴시킬 수 없다.")
+    @DisplayName("등록 대기 상태의 회원을 탈퇴시킬 수 없다.")
     @Test
     void deactivateFailWhenPending() {
         // when & then
@@ -133,11 +133,11 @@ class MemberTest {
         assertThat(member.isActive()).isFalse();
     }
 
-    @DisplayName("유효하지 않은 이메일로 회원을 생성할 수 없다.")
+    @DisplayName("유효하지 않은 이메일로 회원을 등록할 수 없다.")
     @Test
     void invalidEmail() {
         assertThatThrownBy(() ->
-                Member.create(new MemberCreateRequest("invalid email", "Posty", "secret"), passwordEncoder)
+                Member.register(new MemberRegisterRequest("invalid email", "Posty", "secret"), passwordEncoder)
         ).isInstanceOf(IllegalArgumentException.class);
     }
 }

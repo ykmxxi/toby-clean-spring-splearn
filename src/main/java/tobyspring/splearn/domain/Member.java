@@ -21,12 +21,12 @@ public class Member {
     private Member() {
     }
 
-    public static Member create(final MemberCreateRequest createRequest, final PasswordEncoder passwordEncoder) {
+    public static Member register(final MemberRegisterRequest registerRequest, final PasswordEncoder passwordEncoder) {
         Member member = new Member();
 
-        member.email = new Email(requireNonNull(createRequest.email()));
-        member.nickname = requireNonNull(createRequest.nickname());
-        member.passwordHash = requireNonNull(passwordEncoder.encode(createRequest.password()));
+        member.email = new Email(requireNonNull(registerRequest.email()));
+        member.nickname = requireNonNull(registerRequest.nickname());
+        member.passwordHash = requireNonNull(passwordEncoder.encode(registerRequest.password()));
 
         member.status = MemberStatus.PENDING;
 
