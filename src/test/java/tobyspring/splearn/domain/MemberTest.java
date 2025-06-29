@@ -2,6 +2,8 @@ package tobyspring.splearn.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static tobyspring.splearn.domain.MemberFixture.createMemberRegisterRequest;
+import static tobyspring.splearn.domain.MemberFixture.createPasswordEncoder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,18 +18,8 @@ class MemberTest {
 
     @BeforeEach
     void setUp() {
-        this.passwordEncoder = new PasswordEncoder() {
-            @Override
-            public String encode(final String password) {
-                return password.toUpperCase();
-            }
-
-            @Override
-            public boolean matches(final String password, final String passwordHash) {
-                return encode(password).equals(passwordHash);
-            }
-        };
-        member = Member.register(new MemberRegisterRequest("posty@splearn.app", "Posty", "secret"), passwordEncoder);
+        this.passwordEncoder = createPasswordEncoder();
+        member = Member.register(createMemberRegisterRequest(), passwordEncoder);
     }
 
     @DisplayName("회원을 등록하면 PENDING(등록 대기) 상태다.")
@@ -137,7 +129,7 @@ class MemberTest {
     @Test
     void invalidEmail() {
         assertThatThrownBy(() ->
-                Member.register(new MemberRegisterRequest("invalid email", "Posty", "secret"), passwordEncoder)
+                Member.register(createMemberRegisterRequest("invalid email"), passwordEncoder)
         ).isInstanceOf(IllegalArgumentException.class);
     }
 }
