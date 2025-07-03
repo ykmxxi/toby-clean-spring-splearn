@@ -10,9 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.validation.ConstraintViolationException;
 import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.DuplicateEmailException;
 import tobyspring.splearn.domain.Member;
+import tobyspring.splearn.domain.MemberRegisterRequest;
 import tobyspring.splearn.domain.MemberStatus;
 
 @Import(SplearnTestConfiguration.class)
@@ -37,5 +39,19 @@ record MemberRegisterTest(MemberRegister memberRegister) {
 
         assertThatThrownBy(() -> memberRegister.register(createMemberRegisterRequest()))
                 .isInstanceOf(DuplicateEmailException.class);
+    }
+
+    @DisplayName("잘못된 요청이 들어오면 회원 등록에 실패하낟.")
+    @Test
+    void memberRegisterRequestFail() {
+        invalidRequestFail(new MemberRegisterRequest("tobysplearn.app", "toby123", "secret123"));
+        invalidRequestFail(new MemberRegisterRequest("toby@splearn.app", "tob", "secret"));
+        invalidRequestFail(new MemberRegisterRequest("toby@splearn.app", "tob111111111111111111111", "secret"));
+        invalidRequestFail(new MemberRegisterRequest("toby@splearn.app", "toby", "1234567"));
+    }
+
+    private void invalidRequestFail(final MemberRegisterRequest invalid) {
+        assertThatThrownBy(() -> memberRegister.register(invalid))
+                .isInstanceOf(ConstraintViolationException.class);
     }
 }

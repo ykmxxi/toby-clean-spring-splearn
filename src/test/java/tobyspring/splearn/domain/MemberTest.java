@@ -85,8 +85,8 @@ class MemberTest {
 
     @DisplayName("비밀번호가 회원의 패스워드 해시값과 일치하는지 확인한다.")
     @CsvSource(value = {
-            "secret,true",
-            "hello,false"
+            "secret123,true",
+            "hello123,false"
     })
     @ParameterizedTest
     void verifyPassword(String password, boolean expected) {
@@ -106,9 +106,9 @@ class MemberTest {
     @DisplayName("회원의 비밀번호를 변경한다.")
     @Test
     void changePassword() {
-        member.changePassword("verysecret", passwordEncoder);
+        member.changePassword("verysecret2", passwordEncoder);
 
-        assertThat(member.verifyPassword("verysecret", passwordEncoder)).isTrue();
+        assertThat(member.verifyPassword("verysecret2", passwordEncoder)).isTrue();
     }
 
     @DisplayName("회원의 활성 상태를 확인한다.")
