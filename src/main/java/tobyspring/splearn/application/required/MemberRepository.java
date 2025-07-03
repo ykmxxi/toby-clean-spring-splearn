@@ -1,7 +1,10 @@
 package tobyspring.splearn.application.required;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.Repository;
 
+import tobyspring.splearn.domain.Email;
 import tobyspring.splearn.domain.Member;
 
 /**
@@ -15,4 +18,6 @@ public interface MemberRepository extends Repository<Member, Long> {
      * JPA가 아닌 Spring Data JPA를 사용할 때는 등록과 수정에 모두 save를 호출하는 것이 좋음
      */
     Member save(Member member);
+
+    Optional<Member> findByEmail(Email email);
 }
